@@ -15,7 +15,7 @@ def hitung_fuzzy_tsukamoto(df, custom_params=None):
 
     # [1. Pilihan Batas Parameter]
     if custom_params is None:
-        p_htm_murah = [0, 0, 10000, 50000]
+        p_htm_murah = [0, 0, 10000, 50000]  
         p_htm_mahal = [10000, 50000, 500000, 500000]
         p_jarak_dekat = [0, 0, 5, 25]
         p_jarak_jauh = [5, 25, 60, 60]
@@ -50,9 +50,9 @@ def hitung_fuzzy_tsukamoto(df, custom_params=None):
     df_fuzzy['mu_vote_cnt_banyak'] = fuzz.trapmf(df_fuzzy['vote_count'].values, p_vote_cnt_banyak)
     df_fuzzy['mu_hotel_sedikit'] = fuzz.trapmf(df_fuzzy['jumlah_hotel_terdekat'].values, p_hotel_sedikit)
     df_fuzzy['mu_hotel_banyak'] = fuzz.trapmf(df_fuzzy['jumlah_hotel_terdekat'].values, p_hotel_banyak)
+    
 
     # [4. Evaluasi Rule & Inferensi Tsukamoto]
-    # R1 sampai R6 tetap sama seperti kode asli lu...
     df_fuzzy['alpha_R1'] = np.minimum(df_fuzzy['mu_htm_wd_murah'], np.minimum(df_fuzzy['mu_htm_we_murah'], np.minimum(df_fuzzy['mu_jarak_dekat'], np.minimum(df_fuzzy['mu_vote_avg_tinggi'], np.minimum(df_fuzzy['mu_vote_cnt_banyak'], df_fuzzy['mu_hotel_banyak'])))))
     df_fuzzy['z_R1'] = df_fuzzy['alpha_R1'] * 100
 
@@ -71,9 +71,37 @@ def hitung_fuzzy_tsukamoto(df, custom_params=None):
     df_fuzzy['alpha_R6'] = np.minimum(df_fuzzy['mu_htm_wd_murah'], np.minimum(df_fuzzy['mu_htm_we_mahal'], np.minimum(df_fuzzy['mu_jarak_dekat'], np.minimum(df_fuzzy['mu_vote_avg_rendah'], np.minimum(df_fuzzy['mu_vote_cnt_banyak'], df_fuzzy['mu_hotel_banyak'])))))
     df_fuzzy['z_R6'] = 100 - (df_fuzzy['alpha_R6'] * 100)
 
+    # [R7] IF htm_weekend is Mahal AND jarak_pusat_km is Jauh AND vote_average is Tinggi AND vote_count is Banyak THEN Rekomendasi is Tinggi
+    df_fuzzy['alpha_R7'] = np.minimum(df_fuzzy['mu_htm_we_mahal'], np.minimum(df_fuzzy['mu_jarak_jauh'], np.minimum(df_fuzzy['mu_vote_avg_tinggi'], df_fuzzy['mu_vote_cnt_banyak'])))
+    df_fuzzy['z_R7'] = df_fuzzy['alpha_R7'] * 100
+
+    # [R8] IF htm_weekday is Murah AND htm_weekend is Murah AND jarak_pusat_km is Dekat AND vote_average is Tinggi AND vote_count is Banyak AND jumlah_hotel_terdekat is Sedikit THEN Rekomendasi is Tinggi
+    df_fuzzy['alpha_R8'] = np.minimum(df_fuzzy['mu_htm_wd_murah'], np.minimum(df_fuzzy['mu_htm_we_murah'], np.minimum(df_fuzzy['mu_jarak_dekat'], np.minimum(df_fuzzy['mu_vote_avg_tinggi'], np.minimum(df_fuzzy['mu_vote_cnt_banyak'], df_fuzzy['mu_hotel_sedikit'])))))
+    df_fuzzy['z_R8'] = df_fuzzy['alpha_R8'] * 100
+
+    # [R9] IF htm_weekday is Murah AND htm_weekend is Murah AND jarak_pusat_km is Jauh AND vote_average is Tinggi AND vote_count is Banyak AND jumlah_hotel_terdekat is Sedikit THEN Rekomendasi is Tinggi
+    df_fuzzy['alpha_R9'] = np.minimum(df_fuzzy['mu_htm_wd_murah'], np.minimum(df_fuzzy['mu_htm_we_murah'], np.minimum(df_fuzzy['mu_jarak_jauh'], np.minimum(df_fuzzy['mu_vote_avg_tinggi'], np.minimum(df_fuzzy['mu_vote_cnt_banyak'], df_fuzzy['mu_hotel_sedikit'])))))
+    df_fuzzy['z_R9'] = df_fuzzy['alpha_R9'] * 100
+    
     # [5. Defuzzifikasi]
-    total_alpha_z = ((df_fuzzy['alpha_R1'] * df_fuzzy['z_R1']) + (df_fuzzy['alpha_R2'] * df_fuzzy['z_R2']) + (df_fuzzy['alpha_R3'] * df_fuzzy['z_R3']) + (df_fuzzy['alpha_R4'] * df_fuzzy['z_R4']) + (df_fuzzy['alpha_R5'] * df_fuzzy['z_R5']) + (df_fuzzy['alpha_R6'] * df_fuzzy['z_R6']))
-    total_alpha = (df_fuzzy['alpha_R1'] + df_fuzzy['alpha_R2'] + df_fuzzy['alpha_R3'] + df_fuzzy['alpha_R4'] + df_fuzzy['alpha_R5'] + df_fuzzy['alpha_R6'])
+    total_alpha_z = (
+        (df_fuzzy['alpha_R1'] * df_fuzzy['z_R1']) + 
+        (df_fuzzy['alpha_R2'] * df_fuzzy['z_R2']) + 
+        (df_fuzzy['alpha_R3'] * df_fuzzy['z_R3']) + 
+        (df_fuzzy['alpha_R4'] * df_fuzzy['z_R4']) + 
+        (df_fuzzy['alpha_R5'] * df_fuzzy['z_R5']) + 
+        (df_fuzzy['alpha_R6'] * df_fuzzy['z_R6']) + 
+        (df_fuzzy['alpha_R7'] * df_fuzzy['z_R7']) + 
+        (df_fuzzy['alpha_R8'] * df_fuzzy['z_R8']) + 
+        (df_fuzzy['alpha_R9'] * df_fuzzy['z_R9'])
+    )
+    
+    total_alpha = (
+        df_fuzzy['alpha_R1'] + df_fuzzy['alpha_R2'] + 
+        df_fuzzy['alpha_R3'] + df_fuzzy['alpha_R4'] + 
+        df_fuzzy['alpha_R5'] + df_fuzzy['alpha_R6'] + 
+        df_fuzzy['alpha_R7'] + df_fuzzy['alpha_R8'] + df_fuzzy['alpha_R9']
+    )
     df_fuzzy['skor_rekomendasi'] = np.where(total_alpha > 0, total_alpha_z / total_alpha, 0)
 
     return df_fuzzy
@@ -135,6 +163,9 @@ def dapatkan_detail_kalkulasi(df_hasil, nama_wisata):
             'R4': {'alpha': row['alpha_R4'], 'z': row['z_R4'], 'type': 'Rendah'},
             'R5': {'alpha': row['alpha_R5'], 'z': row['z_R5'], 'type': 'Rendah'},
             'R6': {'alpha': row['alpha_R6'], 'z': row['z_R6'], 'type': 'Rendah'},
+            'R7': {'alpha': row['alpha_R7'], 'z': row['z_R7'], 'type': 'Tinggi'},
+            'R8': {'alpha': row['alpha_R8'], 'z': row['z_R8'], 'type': 'Tinggi'},
+            'R9': {'alpha': row['alpha_R9'], 'z': row['z_R9'], 'type': 'Tinggi'}
         },
         'skor_final': row['skor_rekomendasi']
     }
