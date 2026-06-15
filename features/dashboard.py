@@ -14,7 +14,12 @@ def render_dashboard():
         return
 
     # 2. Menjalankan perhitungan Tsukamoto dengan parameter bawaan
-    df_result = hitung_fuzzy_tsukamoto(df_raw)
+    if 'custom_params' in st.session_state and st.session_state.custom_params is not None:
+        st.success("Menggunakan parameter Fuzzy yang telah Anda sesuaikan dari Laboratorium.")
+        df_result = hitung_fuzzy_tsukamoto(df_raw, custom_params=st.session_state.custom_params)
+    else:
+        st.info("Menggunakan parameter Fuzzy bawaan (Default).")
+        df_result = hitung_fuzzy_tsukamoto(df_raw)
     
     # 3. Memproses hasil untuk tampilan tabel
     st.subheader("Top Rekomendasi")

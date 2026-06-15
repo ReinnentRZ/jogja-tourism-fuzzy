@@ -7,3 +7,5 @@ __pycache__/
 # Mengabaikan Virtual Environment (jika ada)
 venv/
 env/
+
+*.~lock.*

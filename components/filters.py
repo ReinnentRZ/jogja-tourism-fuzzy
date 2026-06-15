@@ -7,15 +7,15 @@ def render_parameter_expander():
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.markdown("**💰 Harga Tiket (Rp)**")
+            st.markdown("** Harga Tiket (Rp)**")
             htm_batas = st.slider("Batas Murah - Mahal", 10000, 100000, (10000, 50000), step=5000)
             
         with col2:
-            st.markdown("**📍 Jarak dari Pusat (KM)**")
+            st.markdown("** Jarak dari Pusat (KM)**")
             jarak_batas = st.slider("Batas Dekat - Jauh", 2, 40, (5, 25), step=1)
             
         with col3:
-            st.markdown("**⭐ Rating (Vote Average)**")
+            st.markdown("** Rating (Vote Average)**")
             rating_batas = st.slider("Batas Rendah - Tinggi", 2.0, 5.0, (3.5, 4.5), step=0.1)
 
         # Mapping nilai slider ke format trapesium [a, b, c, d]

@@ -5,7 +5,7 @@ from core.fuzzy import hitung_fuzzy_tsukamoto, dapatkan_detail_kalkulasi, plot_k
 def render_laboratorium():
     st.title("Laboratorium Fuzzy")
     st.markdown("Halaman ini memungkinkan Anda untuk mengubah batasan parameter fuzzy secara manual dan melihat jejak perhitungannya secara detail.")
-
+    
     try:
         df_raw = pariwisata()
     except Exception as e:
@@ -26,17 +26,28 @@ def render_laboratorium():
     with st.form(key='form_parameter'):
         col1, col2, col3 = st.columns(3)
         
+       # Tarik memori sebelumnya (jika ada) supaya slider tidak reset
+        default_htm = (10000, 50000)
+        default_jarak = (5, 25)
+        default_rating = (3.5, 4.5)
+
+        if st.session_state.custom_params is not None:
+            p = st.session_state.custom_params
+            default_htm = (int(p['htm_murah'][2]), int(p['htm_murah'][3]))
+            default_jarak = (int(p['jarak_dekat'][2]), int(p['jarak_dekat'][3]))
+            default_rating = (float(p['vote_avg_rendah'][2]), float(p['vote_avg_rendah'][3]))
+
         with col1:
             st.subheader("Harga Tiket")
-            htm_batas = st.slider("Batas Murah ke Mahal (Rp)", 10000, 100000, (10000, 50000), step=5000)
+            htm_batas = st.slider("Batas Murah ke Mahal (Rp)", 10000, 100000, default_htm, step=5000)
             
         with col2:
             st.subheader("Jarak")
-            jarak_batas = st.slider("Batas Dekat ke Jauh (KM)", 2, 40, (5, 25), step=1)
+            jarak_batas = st.slider("Batas Dekat ke Jauh (KM)", 2, 40, default_jarak, step=1)
             
         with col3:
             st.subheader("Rating")
-            rating_batas = st.slider("Batas Rendah ke Tinggi", 2.0, 5.0, (3.5, 4.5), step=0.1)
+            rating_batas = st.slider("Batas Rendah ke Tinggi", 2.0, 5.0, default_rating, step=0.1)
 
         # Tombol eksekusi
         submit_button = st.form_submit_button(label='Terapkan Parameter')
