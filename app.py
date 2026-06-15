@@ -1,0 +1,30 @@
+import streamlit as st
+from features.dashboard import render_dashboard
+from features.laboratorium import render_laboratorium
+
+# Konfigurasi dasar halaman
+st.set_page_config(
+    page_title="Sistem Rekomendasi Wisata Jogja",
+    layout="wide"
+)
+
+# Membuat Sidebar untuk Navigasi
+st.sidebar.title("Menu Navigasi")
+pilihan_menu = st.sidebar.radio(
+    "Pilih Halaman:",
+    ["Dashboard", "Laboratorium Fuzzy", "Analisis Data"]
+)
+
+st.sidebar.markdown("---")
+st.sidebar.caption("Sistem Rekomendasi Pariwisata Yogyakarta menggunakan Logika Fuzzy Tsukamoto.")
+
+# Routing Halaman berdasarkan pilihan di sidebar
+if pilihan_menu == "Dashboard":
+    render_dashboard()
+    
+elif pilihan_menu == "Laboratorium Fuzzy":
+    render_laboratorium()
+    
+elif pilihan_menu == "Analisis Data":
+    st.title("Analisis Data")
+    st.info("Halaman Analisis Data sedang dalam tahap pengembangan.")
