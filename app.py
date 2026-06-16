@@ -2,7 +2,6 @@ import streamlit as st
 from features.dashboard import render_dashboard
 from features.laboratorium import render_laboratorium
 from features.analisis import render_analisis_data
-from features.peta import render_peta_rekomendasi # Tambahkan baris ini
 
 # Konfigurasi dasar halaman
 st.set_page_config(
@@ -12,9 +11,11 @@ st.set_page_config(
 
 # Membuat Sidebar untuk Navigasi
 st.sidebar.title("Menu Navigasi")
+
+# Peta Rekomendasi dihapus dari daftar menu ini karena sudah masuk ke Dashboard
 pilihan_menu = st.sidebar.radio(
     "Pilih Halaman:",
-    ["Dashboard", "Laboratorium Fuzzy", "Analisis Data", "Peta Rekomendasi"] # Tambahkan menu ini
+    ["Dashboard", "Laboratorium Fuzzy", "Analisis Data"]
 )
 
 st.sidebar.markdown("---")
@@ -29,6 +30,3 @@ elif pilihan_menu == "Laboratorium Fuzzy":
     
 elif pilihan_menu == "Analisis Data":
     render_analisis_data()
-
-elif pilihan_menu == "Peta Rekomendasi": # Tambahkan blok logika ini
-    render_peta_rekomendasi()

@@ -73,7 +73,7 @@ def hitung_fuzzy_tsukamoto(df, custom_params=None):
 
     # [R7] IF htm_weekend is Mahal AND jarak_pusat_km is Jauh AND vote_average is Tinggi AND vote_count is Banyak THEN Rekomendasi is Tinggi
     df_fuzzy['alpha_R7'] = np.minimum(df_fuzzy['mu_htm_we_mahal'], np.minimum(df_fuzzy['mu_jarak_jauh'], np.minimum(df_fuzzy['mu_vote_avg_tinggi'], df_fuzzy['mu_vote_cnt_banyak'])))
-    df_fuzzy['z_R7'] = df_fuzzy['alpha_R7'] * 100
+    df_fuzzy['z_R7'] = 100 - (df_fuzzy['alpha_R7'] * 100)
 
     # [R8] IF htm_weekday is Murah AND htm_weekend is Murah AND jarak_pusat_km is Dekat AND vote_average is Tinggi AND vote_count is Banyak AND jumlah_hotel_terdekat is Sedikit THEN Rekomendasi is Tinggi
     df_fuzzy['alpha_R8'] = np.minimum(df_fuzzy['mu_htm_wd_murah'], np.minimum(df_fuzzy['mu_htm_we_murah'], np.minimum(df_fuzzy['mu_jarak_dekat'], np.minimum(df_fuzzy['mu_vote_avg_tinggi'], np.minimum(df_fuzzy['mu_vote_cnt_banyak'], df_fuzzy['mu_hotel_sedikit'])))))
@@ -81,7 +81,7 @@ def hitung_fuzzy_tsukamoto(df, custom_params=None):
 
     # [R9] IF htm_weekday is Murah AND htm_weekend is Murah AND jarak_pusat_km is Jauh AND vote_average is Tinggi AND vote_count is Banyak AND jumlah_hotel_terdekat is Sedikit THEN Rekomendasi is Tinggi
     df_fuzzy['alpha_R9'] = np.minimum(df_fuzzy['mu_htm_wd_murah'], np.minimum(df_fuzzy['mu_htm_we_murah'], np.minimum(df_fuzzy['mu_jarak_jauh'], np.minimum(df_fuzzy['mu_vote_avg_tinggi'], np.minimum(df_fuzzy['mu_vote_cnt_banyak'], df_fuzzy['mu_hotel_sedikit'])))))
-    df_fuzzy['z_R9'] = df_fuzzy['alpha_R9'] * 100
+    df_fuzzy['z_R9'] = 100 - (df_fuzzy['alpha_R9'] * 100)
     
     # [5. Defuzzifikasi]
     total_alpha_z = (
@@ -163,9 +163,9 @@ def dapatkan_detail_kalkulasi(df_hasil, nama_wisata):
             'R4': {'alpha': row['alpha_R4'], 'z': row['z_R4'], 'type': 'Rendah'},
             'R5': {'alpha': row['alpha_R5'], 'z': row['z_R5'], 'type': 'Rendah'},
             'R6': {'alpha': row['alpha_R6'], 'z': row['z_R6'], 'type': 'Rendah'},
-            'R7': {'alpha': row['alpha_R7'], 'z': row['z_R7'], 'type': 'Tinggi'},
+            'R7': {'alpha': row['alpha_R7'], 'z': row['z_R7'], 'type': 'Rendah'}, # <-- UBAH
             'R8': {'alpha': row['alpha_R8'], 'z': row['z_R8'], 'type': 'Tinggi'},
-            'R9': {'alpha': row['alpha_R9'], 'z': row['z_R9'], 'type': 'Tinggi'}
+            'R9': {'alpha': row['alpha_R9'], 'z': row['z_R9'], 'type': 'Rendah'} # <-- UBAH 
         },
         'skor_final': row['skor_rekomendasi']
     }

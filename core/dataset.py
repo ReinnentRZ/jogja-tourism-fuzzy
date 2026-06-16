@@ -7,7 +7,13 @@ PROJECT_ROOT = CURRENT_DIR.parent
 
 CSV_PATH_PARIWISATA = PROJECT_ROOT / "dataset" / "clean" / "data_pariwisata_clean.csv"
 CSV_PATH_WISATA_FINAL = PROJECT_ROOT / "dataset" / "clean" / "data_wisata_clean.csv"
+CSV_PATH_HOTEL = PROJECT_ROOT / "dataset" / "clean" / "data_hotel_clean.csv"
+
 
 @lru_cache(maxsize=None)
 def pariwisata():
     return pd.read_csv(CSV_PATH_PARIWISATA)
+
+@lru_cache(maxsize=None)
+def hotel():
+    return pd.read_csv(CSV_PATH_HOTEL)

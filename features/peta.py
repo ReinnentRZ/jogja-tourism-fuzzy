@@ -1,108 +1,45 @@
-import streamlit as st
+import folium
 import pandas as pd
-import numpy as np
-import math
-from core.dataset import pariwisata
-from core.fuzzy import hitung_fuzzy_tsukamoto
 
-def hitung_haversine(lat1, lon1, lat2, lon2):
+def buat_peta_rekomendasi(df_wisata, pusat_lat, pusat_lon, nama_pusat="Titik Pencarian"):
     """
-    Menghitung jarak garis lurus antara dua titik koordinat di permukaan bumi dalam satuan Kilometer.
+    Membuat objek peta Folium dengan titik pusat (hotel/user) dan sebaran lokasi wisata.
+    
+    Parameter:
+    - df_wisata: Dataframe berisi top 10 wisata yang sudah dihitung skornya.
+    - pusat_lat, pusat_lon: Koordinat titik acuan (Pusat baru).
+    - nama_pusat: Nama label untuk penanda titik pusat.
     """
-    R = 6371.0 # Radius rata-rata bumi dalam kilometer
+    # 1. Inisialisasi peta, difokuskan pada titik pusat pencarian
+    peta = folium.Map(location=[pusat_lat, pusat_lon], zoom_start=12)
 
-    lat1_rad = math.radians(lat1)
-    lon1_rad = math.radians(lon1)
-    lat2_rad = math.radians(lat2)
-    lon2_rad = math.radians(lon2)
+    # 2. Tambahkan Penanda (Marker) untuk Titik Pusat
+    # Diberi warna biru dengan ikon informasi agar beda dari tempat wisata
+    folium.Marker(
+        location=[pusat_lat, pusat_lon],
+        popup=f"<b>{nama_pusat}</b><br>Titik Acuan Pencarian",
+        tooltip="Lokasi Pusat",
+        icon=folium.Icon(color="blue", icon="info-sign")
+    ).add_to(peta)
 
-    dlon = lon2_rad - lon1_rad
-    dlat = lat2_rad - lat1_rad
+    # 3. Tambahkan Penanda untuk Top 10 Tempat Wisata
+    for index, row in df_wisata.iterrows():
+        # Validasi sederhana agar tidak error jika ada data kosong
+        if pd.notna(row['latitude']) and pd.notna(row['longitude']):
+            
+            # Format teks yang muncul saat pin diklik
+            teks_popup = f"""
+            <b>{row['nama']}</b><br>
+            Jarak: {row['jarak_pusat_km']:.2f} KM<br>
+            Skor Rekomendasi: {row['skor_rekomendasi']:.2f}
+            """
+            
+            # Marker wisata diberi warna merah
+            folium.Marker(
+                location=[row['latitude'], row['longitude']],
+                popup=folium.Popup(teks_popup, max_width=300),
+                tooltip=row['nama'], # Teks yang muncul saat kursor diarahkan (hover)
+                icon=folium.Icon(color="red", icon="map-marker")
+            ).add_to(peta)
 
-    a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-
-    jarak_km = R * c
-    return jarak_km
-
-def render_peta_rekomendasi():
-    st.title("Peta Rekomendasi Dinamis (Berbasis Lokasi)")
-    st.markdown("Fitur ini menghitung ulang rekomendasi wisata menggunakan logika Fuzzy berdasarkan jarak aktual dari posisi Anda saat ini.")
-
-    try:
-        df = pariwisata()
-    except Exception as e:
-        st.error(f"Gagal memuat dataset: {e}")
-        return
-
-    # Memastikan kolom koordinat tersedia
-    if 'latitude' not in df.columns or 'longitude' not in df.columns:
-        st.warning("Kolom 'latitude' dan/atau 'longitude' tidak ditemukan dalam dataset. Pastikan penamaan kolom sudah benar.")
-        return
-
-    # 1. Definisi Lokasi Pengguna
-    st.header("1. Tentukan Posisi Anda")
-    
-    # Preset lokasi acuan di Yogyakarta
-    lokasi_preset = {
-        "Stasiun Tugu": (-7.7891, 110.3633),
-        "Terminal Giwangan": (-7.8344, 110.3925),
-        "Bandara YIA": (-7.8967, 110.0526),
-        "Kotagede (Jalan Kemasan)": (-7.8286, 110.3995),
-        "Custom (Input Manual)": (0.0, 0.0)
-    }
-    
-    pilihan_lokasi = st.selectbox("Pilih Titik Awal (Pusat Baru):", list(lokasi_preset.keys()))
-    
-    col_lat, col_lon = st.columns(2)
-    if pilihan_lokasi == "Custom (Input Manual)":
-        user_lat = col_lat.number_input("Latitude", value=-7.7956)
-        user_lon = col_lon.number_input("Longitude", value=110.3695)
-    else:
-        user_lat = col_lat.number_input("Latitude", value=lokasi_preset[pilihan_lokasi][0], disabled=True)
-        user_lon = col_lon.number_input("Longitude", value=lokasi_preset[pilihan_lokasi][1], disabled=True)
-
-    tombol_hitung = st.button("Hitung Ulang Rekomendasi dari Lokasi Ini", type="primary")
-
-    if tombol_hitung:
-        # 2. Injeksi Jarak Dinamis (Haversine)
-        # Menimpa kolom jarak_pusat_km dengan jarak dari lokasi pengguna yang baru
-        df['jarak_pusat_km'] = df.apply(
-            lambda row: hitung_haversine(user_lat, user_lon, row['latitude'], row['longitude']), axis=1
-        )
-
-        # 3. Eksekusi Ulang Fuzzy Tsukamoto
-        # Jika ada parameter custom di session state, kita gunakan. Jika tidak, gunakan default.
-        if 'custom_params' in st.session_state and st.session_state.custom_params is not None:
-            df_hasil = hitung_fuzzy_tsukamoto(df, custom_params=st.session_state.custom_params)
-        else:
-            df_hasil = hitung_fuzzy_tsukamoto(df)
-
-        # Mengurutkan hasil berdasarkan skor terbaik
-        df_sorted = df_hasil.sort_values(by='skor_rekomendasi', ascending=False).reset_index(drop=True)
-        
-        # Mengambil Top 10 untuk ditampilkan di peta agar tidak terlalu penuh
-        top_10 = df_sorted.head(10)
-
-        st.markdown("---")
-        st.header("2. Hasil Rekomendasi Terdekat & Terbaik")
-        
-        # 4. Merender Peta menggunakan st.map bawaan Streamlit
-        st.markdown("Titik pada peta di bawah menunjukkan 10 tempat wisata dengan skor rekomendasi tertinggi berdasarkan lokasi yang Anda tentukan.")
-        
-        # Persiapan data peta (Streamlit map mendeteksi kolom 'latitude' dan 'longitude' secara otomatis)
-        peta_data = top_10[['nama', 'latitude', 'longitude']].copy()
-        
-        st.map(peta_data, zoom=10)
-
-        # 5. Tampilkan Tabel Ringkasan
-        st.markdown("#### Detail 10 Rekomendasi Teratas")
-        kolom_tampil = ['nama', 'jarak_pusat_km', 'htm_weekday', 'skor_rekomendasi']
-        df_tampil = top_10[kolom_tampil].copy()
-        df_tampil['jarak_pusat_km'] = df_tampil['jarak_pusat_km'].round(2)
-        df_tampil['skor_rekomendasi'] = df_tampil['skor_rekomendasi'].round(2)
-        
-        # Rename kolom untuk tampilan
-        df_tampil.rename(columns={'jarak_pusat_km': 'Jarak dari Anda (KM)'}, inplace=True)
-        
-        st.dataframe(df_tampil, use_container_width=True, hide_index=True)
+    return peta
