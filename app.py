@@ -12,7 +12,6 @@ st.set_page_config(
 # Membuat Sidebar untuk Navigasi
 st.sidebar.title("Menu Navigasi")
 
-# Peta Rekomendasi dihapus dari daftar menu ini karena sudah masuk ke Dashboard
 pilihan_menu = st.sidebar.radio(
     "Pilih Halaman:",
     ["Dashboard", "Laboratorium Fuzzy", "Analisis Data"]

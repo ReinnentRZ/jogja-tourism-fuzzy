@@ -3,12 +3,15 @@ import pandas as pd
 import skfuzzy as fuzz
 import matplotlib.pyplot as plt
 
-#[R1] IF htm_weekday is Murah AND htm_weekend is Murah AND jarak_pusat_km is Dekat AND vote_average is Tinggi AND vote_count is Banyak AND jumlah_hotel_terdekat is Banyak THEN Rekomendasi is Tinggi
-#[R2] IF htm_weekday is Murah AND htm_weekend is Murah AND jarak_pusat_km is Jauh AND vote_average is Tinggi AND vote_count is Sedikit AND jumlah_hotel_terdekat is Sedikit THEN Rekomendasi is Tinggi
-#[R3] IF htm_weekday is Mahal AND htm_weekend is Mahal AND jarak_pusat_km is Dekat AND vote_average is Tinggi AND vote_count is Banyak AND jumlah_hotel_terdekat is Banyak THEN Rekomendasi is Tinggi
-#[R4] IF htm_weekday is Mahal AND htm_weekend is Mahal AND jarak_pusat_km is Dekat AND vote_average is Rendah AND vote_count is Banyak AND jumlah_hotel_terdekat is Banyak THEN Rekomendasi is Rendah
-#[R5] IF htm_weekday is Mahal AND htm_weekend is Mahal AND jarak_pusat_km is Jauh AND vote_average is Rendah AND vote_count is Sedikit AND jumlah_hotel_terdekat is Sedikit THEN Rekomendasi is Rendah
-#[R6] IF htm_weekday is Murah AND htm_weekend is Mahal AND jarak_pusat_km is Dekat AND vote_average is Rendah AND vote_count is Banyak AND jumlah_hotel_terdekat is Banyak THEN Rekomendasi is Rendah
+# [R1] Jika Harga Murah, Jarak Dekat, Rating Tinggi, Ulasan Banyak, dan Hotel Banyak, maka Rekomendasi Tinggi.
+# [R2] Jika Harga Murah, Jarak Jauh, Rating Tinggi, Ulasan Sedikit, dan Hotel Sedikit, maka Rekomendasi Tinggi.
+# [R3] Jika Harga Mahal, Jarak Dekat, Rating Tinggi, Ulasan Banyak, dan Hotel Banyak, maka Rekomendasi Rendah.
+# [R4] Jika Harga Mahal, Jarak Dekat, Rating Rendah, Ulasan Banyak, dan Hotel Banyak, maka Rekomendasi Rendah.
+# [R5] Jika Harga Mahal, Jarak Jauh, Rating Rendah, Ulasan Sedikit, dan Hotel Sedikit, maka Rekomendasi Rendah.
+# [R6] Jika Harga (Weekday Murah & Weekend Mahal), Jarak Dekat, Rating Rendah, Ulasan Banyak, dan Hotel Banyak, maka Rekomendasi Rendah.
+# [R7] Jika Harga Weekend Mahal, Jarak Jauh, Rating Tinggi, dan Ulasan Banyak, maka Rekomendasi Rendah.
+# [R8] Jika Harga Murah, Jarak Dekat, Rating Tinggi, Ulasan Banyak, dan Hotel Sedikit, maka Rekomendasi Tinggi.
+# [R9] Jika Harga Murah, Jarak Jauh, Rating Tinggi, Ulasan Banyak, dan Hotel Sedikit, maka Rekomendasi Tinggi.
 
 def hitung_fuzzy_tsukamoto(df, custom_params=None):
     df_fuzzy = df.copy()
@@ -109,7 +112,7 @@ def hitung_fuzzy_tsukamoto(df, custom_params=None):
 def plot_kurva(judul, max_val, param_rendah, param_tinggi, label_rendah="Rendah/Murah/Dekat", label_tinggi="Tinggi/Mahal/Jauh"):
     x_plot = np.linspace(0, max_val, 1000)
     
-    # FIX: Langsung evaluasi x_plot ke trapmf tanpa interp_membership
+    # FIX: evaluasi x_plot ke trapmf tanpa interp_membership
     y_rendah = fuzz.trapmf(x_plot, param_rendah)
     y_tinggi = fuzz.trapmf(x_plot, param_tinggi)
     
