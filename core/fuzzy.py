@@ -164,14 +164,13 @@ def dapatkan_detail_kalkulasi(df_hasil, nama_wisata):
         'rules': {
             'R1': {'alpha': row['alpha_R1'], 'z': row['z_R1'], 'type': 'Tinggi'},
             'R2': {'alpha': row['alpha_R2'], 'z': row['z_R2'], 'type': 'Tinggi'},
-            'R3': {'alpha': row['alpha_R3'], 'z': row['z_R3'], 'type': 'Tinggi'},
+            'R3': {'alpha': row['alpha_R3'], 'z': row['z_R3'], 'type': 'Rendah'}, 
             'R4': {'alpha': row['alpha_R4'], 'z': row['z_R4'], 'type': 'Rendah'},
             'R5': {'alpha': row['alpha_R5'], 'z': row['z_R5'], 'type': 'Rendah'},
             'R6': {'alpha': row['alpha_R6'], 'z': row['z_R6'], 'type': 'Rendah'},
-            'R7': {'alpha': row['alpha_R7'], 'z': row['z_R7'], 'type': 'Rendah'}, # <-- UBAH
+            'R7': {'alpha': row['alpha_R7'], 'z': row['z_R7'], 'type': 'Rendah'}, 
             'R8': {'alpha': row['alpha_R8'], 'z': row['z_R8'], 'type': 'Tinggi'},
-            'R9': {'alpha': row['alpha_R9'], 'z': row['z_R9'], 'type': 'Rendah'} # <-- UBAH 
+            'R9': {'alpha': row['alpha_R9'], 'z': row['z_R9'], 'type': 'Tinggi'}  
         },
-        'skor_final': row['skor_rekomendasi']
     }
     return detail
