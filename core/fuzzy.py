@@ -63,7 +63,8 @@ def hitung_fuzzy_tsukamoto(df, custom_params=None):
     df_fuzzy['z_R2'] = df_fuzzy['alpha_R2'] * 100
 
     df_fuzzy['alpha_R3'] = np.minimum(df_fuzzy['mu_htm_wd_mahal'], np.minimum(df_fuzzy['mu_htm_we_mahal'], np.minimum(df_fuzzy['mu_jarak_dekat'], np.minimum(df_fuzzy['mu_vote_avg_tinggi'], np.minimum(df_fuzzy['mu_vote_cnt_banyak'], df_fuzzy['mu_hotel_banyak'])))))
-    df_fuzzy['z_R3'] = df_fuzzy['alpha_R3'] * 100
+    df_fuzzy['z_R3'] = 100 - (df_fuzzy['alpha_R3'] * 100)
+    #df_fuzzy['z_R3'] = df_fuzzy['alpha_R3'] * 100
 
     df_fuzzy['alpha_R4'] = np.minimum(df_fuzzy['mu_htm_wd_mahal'], np.minimum(df_fuzzy['mu_htm_we_mahal'], np.minimum(df_fuzzy['mu_jarak_dekat'], np.minimum(df_fuzzy['mu_vote_avg_rendah'], np.minimum(df_fuzzy['mu_vote_cnt_banyak'], df_fuzzy['mu_hotel_banyak'])))))
     df_fuzzy['z_R4'] = 100 - (df_fuzzy['alpha_R4'] * 100)
@@ -74,7 +75,7 @@ def hitung_fuzzy_tsukamoto(df, custom_params=None):
     df_fuzzy['alpha_R6'] = np.minimum(df_fuzzy['mu_htm_wd_murah'], np.minimum(df_fuzzy['mu_htm_we_mahal'], np.minimum(df_fuzzy['mu_jarak_dekat'], np.minimum(df_fuzzy['mu_vote_avg_rendah'], np.minimum(df_fuzzy['mu_vote_cnt_banyak'], df_fuzzy['mu_hotel_banyak'])))))
     df_fuzzy['z_R6'] = 100 - (df_fuzzy['alpha_R6'] * 100)
 
-    # [R7] IF htm_weekend is Mahal AND jarak_pusat_km is Jauh AND vote_average is Tinggi AND vote_count is Banyak THEN Rekomendasi is Tinggi
+    # [R7] IF htm_weekend is Mahal AND jarak_pusat_km is Jauh AND vote_average is Tinggi AND vote_count is Banyak THEN Rekomendasi is Rendah
     df_fuzzy['alpha_R7'] = np.minimum(df_fuzzy['mu_htm_we_mahal'], np.minimum(df_fuzzy['mu_jarak_jauh'], np.minimum(df_fuzzy['mu_vote_avg_tinggi'], df_fuzzy['mu_vote_cnt_banyak'])))
     df_fuzzy['z_R7'] = 100 - (df_fuzzy['alpha_R7'] * 100)
 
@@ -84,7 +85,8 @@ def hitung_fuzzy_tsukamoto(df, custom_params=None):
 
     # [R9] IF htm_weekday is Murah AND htm_weekend is Murah AND jarak_pusat_km is Jauh AND vote_average is Tinggi AND vote_count is Banyak AND jumlah_hotel_terdekat is Sedikit THEN Rekomendasi is Tinggi
     df_fuzzy['alpha_R9'] = np.minimum(df_fuzzy['mu_htm_wd_murah'], np.minimum(df_fuzzy['mu_htm_we_murah'], np.minimum(df_fuzzy['mu_jarak_jauh'], np.minimum(df_fuzzy['mu_vote_avg_tinggi'], np.minimum(df_fuzzy['mu_vote_cnt_banyak'], df_fuzzy['mu_hotel_sedikit'])))))
-    df_fuzzy['z_R9'] = 100 - (df_fuzzy['alpha_R9'] * 100)
+    df_fuzzy['z_R9'] = df_fuzzy['alpha_R9'] * 100
+    # df_fuzzy['z_R9'] = 100 - (df_fuzzy['alpha_R9'] * 100)
     
     # [5. Defuzzifikasi]
     total_alpha_z = (
