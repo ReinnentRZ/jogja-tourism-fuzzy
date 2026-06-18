@@ -172,5 +172,6 @@ def dapatkan_detail_kalkulasi(df_hasil, nama_wisata):
             'R8': {'alpha': row['alpha_R8'], 'z': row['z_R8'], 'type': 'Tinggi'},
             'R9': {'alpha': row['alpha_R9'], 'z': row['z_R9'], 'type': 'Tinggi'}  
         },
+        'skor_final': row['skor_rekomendasi'] 
     }
     return detail
